@@ -1,9 +1,12 @@
 import os
 import sys
 import time
+import shlex
 import socket
+from subprocess import call
 
 
+DEVNULL = open(os.devnull, 'wb')
 single_instance_lock = None
 
 
@@ -77,3 +80,31 @@ class cached_property:
             return self
         res = instance.__dict__[self.name] = self.func(instance)
         return res
+
+
+def xcall(command, **kwargs):
+    from gwtool.env import logger
+
+    logger.info(f'Call command: {" ".join(command)}')
+    silence_error = kwargs.pop('silence_error', False)
+    if silence_error:
+        kwargs["stderr"] = DEVNULL
+    ret = call(command, **kwargs)
+    if ret != 0 and not silence_error:
+        logger.error(f'ERROR: command exited with non-zero: {ret}')
+
+
+def _gen_command(prefix):
+    def _command(*args, **kwargs):
+        command = prefix if isinstance(prefix, list) else shlex.split(prefix)
+        for arg in args:
+            command.extend(shlex.split(arg))
+        xcall(command, **kwargs)
+    return _command
+
+
+ip = _gen_command('ip')
+iproute = _gen_command('ip route')
+iprule = _gen_command('ip rule')
+ipxfrm = _gen_command('ip xfrm')
+nft = _gen_command('nft')

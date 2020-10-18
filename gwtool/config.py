@@ -108,6 +108,7 @@ class Config:
     """
     def __init__(self, config_file):
         if config_file.exists():
+            logger.info(f'Loading gateway config file: {config_file}')
             try:
                 with config_file.open(encoding='utf8') as fp:
                     content = yaml.safe_load(fp)

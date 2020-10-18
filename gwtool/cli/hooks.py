@@ -19,7 +19,7 @@ def ifaceup():
         return
 
     iface = libgw.Interface.get(ifname)
-    if not iface or iface.exists:
+    if not iface or not iface.exists:
         logger.error(f'iface does not found in libgw: {ifname}')
         return
 

@@ -76,8 +76,8 @@ class Interface:
 
         # scan all user configured interface and register as well
         for ifname, config in env.gwconfig.interfaces.items():
-            logger.warning(f'Link not found for user configured interface: {ifname}')
             if ifname not in cls._interfaces:
+                logger.warning(f'Link not found for user configured interface: {ifname}')
                 cls._interfaces[ifname] = cls(ifname, None, config)
 
         cls._loaded = True

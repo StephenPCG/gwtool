@@ -152,5 +152,9 @@ def copyfile(src, dst, create_dst_dir=True, backup=False):
         print(f'remove {dst}')
         dst.unlink()
 
+    if dst.is_symlink() and not dst.exists():
+        print(f'remove {dst}')
+        dst.unlink()
+
     print(f'copy {src} -> {dst}')
     shutil.copyfile(src.as_posix(), dst.as_posix())

@@ -203,13 +203,14 @@ class NetZone:
     def __init__(self, name, file):
         self.name = name
         self.file = file
-        logger.debug(f'Loaded NetZone: {self}')
 
         with file.open(encoding='utf8') as fp:
             cidr_list = [re.split(';|#| ', line)[0].strip() for line in fp.readlines()]
             cidr_list = [n for n in cidr_list if n]
 
         self.cidr_list = cidr_list
+
+        logger.debug(f'Loaded NetZone: {self}')
 
     # ---- 8< ----
 

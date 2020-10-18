@@ -72,10 +72,7 @@ def cli_setup_ifaces():
 
 @cli.group('install')
 def install():
-    run_as_root()
-    single_instance()
-    env.configure()
-    env.logger.info(f'Running: {" ".join(sys.argv)}')
+    pass
 
 
 @install.command('coredns')

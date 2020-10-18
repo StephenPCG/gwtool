@@ -2,8 +2,10 @@ import os
 import sys
 import time
 import shlex
+import shutil
 import socket
 import ipaddress
+from pathlib import Path
 from subprocess import call
 
 
@@ -121,3 +123,34 @@ def is_valid_cidr(address):
         return True
     except ValueError:
         return False
+
+
+def copyfile(src, dst, create_dst_dir=True, backup=False):
+    if not isinstance(src, Path):
+        src = Path(src)
+    if not isinstance(dst, Path):
+        dst = Path(dst)
+
+    if not src.exists():
+        raise Exception(f'copyfile(): src does not exist: {src}')
+
+    if src.is_dir():
+        raise Exception(f'copyfile(): src must be a file, not directory: {src}')
+
+    if dst.is_dir():
+        dst = dst / src.name
+
+    if not dst.parent.exists():
+        print(f'create dst dir {dst.parent}')
+        dst.parent.mkdir(parents=True, exists_ok=True)
+
+    if dst.exists():
+        if backup:
+            bak = dst.parent / (dst.name + '.bak')
+            print(f'backup dst file: {dst} -> {bak}')
+            copyfile(dst, bak)
+        print(f'remove {dst}')
+        dst.unlink()
+
+    print(f'copy {src} -> {dst}')
+    shutil.copyfile(src.as_posix(), dst.as_posix())

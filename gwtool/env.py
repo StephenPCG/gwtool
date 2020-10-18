@@ -35,8 +35,8 @@ class Env:
 
         # Workspace stores instance configuration and scripts. It usually is '/opt/gateway'.
         self.workspace = Path(workspace or '/opt/gateway')
-        # Config file is the core configuration to gwtool. It usually is {workspace}/gateway.yaml.
-        self.config_file = config_file and Path(config_file) or self.workspace / 'gateway.yaml'
+        # Config file is the core configuration to gwtool. It usually is {workspace}/configs/gateway.yaml.
+        self.config_file = config_file and Path(config_file) or self.workspace / 'configs' / 'gateway.yaml'
         # Gwtool is usually run by triggers (e.g. if-up), we try to log important messages for trouble shooting.
         self.log_file = log_file and Path(log_file) or self.workspace / 'var/log/gwtool.log'
 

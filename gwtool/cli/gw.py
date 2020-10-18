@@ -81,6 +81,7 @@ def install_coredns():
     corefile = env.workspace / 'configs' / 'Corefile'
 
     copyfile(datadir / 'coredns.bin', '/usr/local/bin/coredns')
+    xrun('chmod +x /usr/local/bin/coredns')
     copyfile(datadir / 'coredns-sysusers.conf', '/usr/lib/sysusers.d/coredns.conf')
     copyfile(datadir / 'coredns-tmpfiles.conf', '/usr/lib/tmpfiles.d/coredns.conf')
     copyfile(datadir / 'coredns.service', '/etc/systemd/system/coredns.service')
@@ -97,11 +98,14 @@ def install_vlmcsd():
     datadir = env.codespace / 'install' / 'vlmcsd'
 
     copyfile(datadir / 'vlmcsd.bin', '/usr/local/bin/vlmcsd')
+    xrun('chmod +x /usr/local/bin/vlmcsd')
     copyfile(datadir / 'vlmcsd-sysusers.conf', '/usr/lib/sysusers.d/vlmcsd.conf')
     copyfile(datadir / 'vlmcsd-tmpfiles.conf', '/usr/lib/tmpfiles.d/vlmcsd.conf')
     copyfile(datadir / 'vlmcsd.service', '/etc/systemd/system/vlmcsd.service')
     xrun('systemd-sysusers')
     xrun('systemd-tmpfiles --create')
+    xrun('mkdir -p /var/log/vlmcsd')
+    xrun('chown vlmcsd:vlmcsd /var/log/vlmcsd')
     xrun('systemctl daemon-reload')
     xrun('systemctl enable --now vlmcsd')
 

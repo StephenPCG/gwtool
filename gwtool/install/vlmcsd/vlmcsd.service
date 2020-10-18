@@ -4,10 +4,9 @@ After=network.target
 
 [Service]
 Type=forking
-PIDFile=/run/vlmcsd.pid
 User=vlmcsd
 WorkingDirectory=~
-ExecStart=/usr/local/bin/vlmcsd -l /var/log/vlmcsd.log -p /run/vlmcsd.pid
+ExecStart=/usr/local/bin/vlmcsd -l /var/log/vlmcsd/vlmcsd.log
 
 [Install]
 WantedBy=multi-user.target

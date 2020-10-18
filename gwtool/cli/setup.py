@@ -1,14 +1,15 @@
 import tempfile
 
 from gwtool.env import env, logger
-from gwtool.utils import is_valid_cidr, xcall, iprule, iproute
+from gwtool.utils import is_valid_cidr, xcall, xrun, iprule, iproute
 from gwtool.libgw import Gateway, NetZone
 
 
 def setup_firewall():
     logger.info('running setup_firewall()')
-    script = env.firewall_script or env.codespace / 'nftables' / 'firewall.nft'
-    xcall([script.as_posix()])
+    script = env.gwconfig.firewall_script or env.codespace / 'nftables' / 'firewall.nft'
+    # run "nft -f {script}", in case firewall_script has no exec bit set
+    xrun(f'/usr/sbin/nft -f {script}')
 
 
 def setup_route():

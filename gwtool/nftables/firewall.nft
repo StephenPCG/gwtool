@@ -1,0 +1,216 @@
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+define PRIVATE_NETWORKS = { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10 }
+
+table inet firewall {
+    chain input {
+        type filter hook input priority 0; policy drop;
+
+        # allways accept loopback
+        iif lo accept
+
+        # drop invalid connections and accept established connections
+        ct state invalid drop
+        ct state established,related accept
+
+        iifgroup vmap {
+            0x1: jump input_from_wan,
+            0x2: jump input_from_lan,
+            0x3: jump input_from_guest,
+            0x4: jump input_from_tunnel,
+        }
+    }
+
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+
+        # drop invalid connections and accept established connections
+        ct state invalid drop
+        ct state established,related accept
+
+        # equivalent to '-j TCPMSS --clamp-mss-to-pmtu'.
+        tcp flags syn tcp option maxseg size set rt mtu
+
+        iifgroup vmap {
+            0x1: jump forward_from_wan,
+            0x2: jump forward_from_lan,
+            0x3: jump forward_from_guest,
+            0x4: jump forward_from_tunnel,
+        }
+    }
+
+    chain output {
+        type filter hook output priority 0; policy accept;
+    }
+
+    chain input_from_lan {
+        jump input_from_lan_custom
+
+        # allow all traffic from lan
+        accept
+    }
+
+    chain input_from_wan {
+        jump input_from_wan_custom
+
+        # drop any other traffic from wan
+        drop
+    }
+
+    chain input_from_guest {
+        jump input_from_guest_custom
+
+        # accept dns request, dhcp request from guest
+        udp dport { 53, 67 } accept
+
+        # drop any other traffic from guest
+        drop
+    }
+
+    chain input_from_tunnel {
+        jump input_from_tunnel_custom
+
+        # drop any other traffic from tunnel
+        drop
+    }
+
+    chain forward_from_lan {
+        jump forward_from_lan_custom
+
+        # allow forward from lan to anywhere
+        accept
+    }
+
+    chain forward_from_wan {
+        jump forward_from_wan_custom
+
+        # don't forward any packets from wan
+        drop
+    }
+
+    chain forward_from_guest {
+        jump forward_from_guest_custom
+
+        # allow forward from guest to wan
+        oifgroup 0x1 accept
+
+        # allow forward from guest to tunnel only if destination address is not a private addr
+        oifgroup 0x4 ip daddr != $PRIVATE_NETWORKS accept
+
+        # drop any other traffic
+        drop
+    }
+
+    chain forward_from_tunnel {
+        jump forward_from_tunnel_custom
+
+        # drop any other traffic
+        drop
+    }
+
+    chain input_from_lan_custom {}
+    chain input_from_wan_custom {}
+    chain input_from_guest_custom {}
+    chain input_from_tunnel_custom {}
+    chain forward_from_lan_custom {}
+    chain forward_from_wan_custom {}
+    chain forward_from_guest_custom {}
+    chain forward_from_tunnel_custom {}
+}
+
+table inet routing {
+    chain output {
+        type route hook output priority -200;
+
+        ct state new jump route_in_ct
+
+        jump route_in_nf
+    }
+
+    chain prerouting {
+        type filter hook prerouting priority -200;
+
+        ct state new jump route_in_ct
+
+        jump route_in_nf
+    }
+
+    chain postrouting {
+        type filter hook postrouting priority -200;
+
+        ct state new jump route_out_ct
+    }
+
+    chain route_in_ct {
+        jump route_in_ct_custom
+    }
+
+    chain route_in_nf {
+        jump route_in_nf_custom
+    }
+
+    chain route_out_ct {
+        jump route_out_ct_custom
+    }
+
+    chain route_in_ct_custom {}
+    chain route_out_ct_custom {}
+    chain route_in_nf_custom {}
+}
+
+table inet portmap {
+    chain output {
+        type nat hook output priority -101; # dstnat - 1
+        jump portmap_in_custom
+    }
+
+    chain prerouting {
+        type nat hook prerouting priority dstnat - 1;
+        jump portmap_in_custom
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority srcnat - 1;
+        jump portmap_out_custom
+    }
+
+    chain portmap_in_custom {}
+    chain portmap_out_custom {}
+    chain portmap_forward_custom {}
+}
+
+table inet nat {
+    chain output {
+        type nat hook output priority -100; # dstnat
+
+        jump output_custom
+    }
+
+    chain prerouting {
+        type nat hook prerouting priority dstnat;
+
+        jump prerouting_custom
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority srcnat;
+
+        jump postrouting_custom
+
+        # masquerade when going out to wan
+        oifgroup 0x1 masquerade
+
+        # when going out to tunnels, should config case by case, but masquerade can be a good default
+        oifgroup 0x4 masquerade
+    }
+
+    chain output_custom {}
+    chain prerouting_custom {}
+    chain postrouting_custom {}
+}
+
+include "/opt/gateway/nftables/*.nft"
+
+# vim: set ft=nftables:

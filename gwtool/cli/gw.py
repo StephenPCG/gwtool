@@ -42,20 +42,30 @@ def cli():
 @click.pass_context
 def cli_setup(ctx):
     if ctx.invoked_subcommand is None:
-        click.echo('running: setup all')
-    else:
-        click.echo(f'running: setup {ctx.invoked_subcommand}')
+        from .setup import setup_all
+        setup_all()
 
 
 @cli_setup.command('firewall')
 def cli_setup_firewall():
-    pass
+    from .setup import setup_firewall, setup_route
+    setup_firewall()
+    setup_route()
 
 
 @cli_setup.command('route')
 def cli_setup_route():
-    pass
+    from .setup import setup_route
+    setup_route()
 
 
-if __name__ == '__main__':
-    cli()
+@cli_setup.command('portmap')
+def cli_setup_portmap():
+    from .setup import setup_portmap
+    setup_portmap()
+
+
+@cli_setup.command('ifaces')
+def cli_setup_ifaces():
+    from .setup import setup_ifaces
+    setup_ifaces()

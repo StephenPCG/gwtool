@@ -145,6 +145,8 @@ class Config:
         netzone_search_path.append(env.codespace / 'netzones')
         self.netzone_search_path = netzone_search_path
 
+        self.firewall_script = content.get('firewall_entry', None)
+
     def validate(self, **kwargs):
         for interface in self.interfaces.values():
             interface.validate(**kwargs)

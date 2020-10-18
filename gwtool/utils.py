@@ -3,6 +3,7 @@ import sys
 import time
 import shlex
 import socket
+import ipaddress
 from subprocess import call
 
 
@@ -108,3 +109,11 @@ iproute = _gen_command('ip route')
 iprule = _gen_command('ip rule')
 ipxfrm = _gen_command('ip xfrm')
 nft = _gen_command('nft')
+
+
+def is_valid_cidr(address):
+    try:
+        ipaddress.ip_network(address, strict=False)
+        return True
+    except ValueError:
+        return False

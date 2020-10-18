@@ -1,0 +1,68 @@
+interfaces:
+  eth0:
+    # set eth0 devgroup to wan
+    devgroup: wan
+    # config eth0's gateway address, the generated route entry will be 'x.x.x.x via 1.2.3.4 dev eth0'
+    gateway: 1.2.3.4
+
+  pppoe0:
+    devgroup: wan
+    # without "gateway" property, the route entry will  be 'x.x.x.x dev pppoe0'
+
+  eth1:
+    # set eth1 as lan
+    devgroup: lan
+
+gateways:
+  telecom:
+    # we create a gateway named "telecom", which is just alias of eth0
+    link: eth0
+  unicom:
+    # we create a gateway named "unicom", which is just alias of ppppoe0
+    link: pppoe0
+  k8s_cluster:
+    # we create a gateway named "k8s_clustere", which routes packets via eth1 to 192.168.0.10
+    # the generated route entry will be "{k8s cidr} via 192.168.0.10 via eth1"
+    interface: eth1
+    gateway: 192.168.1.10
+  wan:
+    # create a gateway named "wan", with multiple interfaces, generated route entry looks like:
+    # "{cidr} nexthop via 1.2.3.4 dev eth0 nexthop dev ppppoe0"
+    interfaces: [eth0, pppoe0]
+
+routing:
+  tables:
+    # ip route flush table 60
+    60:
+    # for cidr in office1:
+    #     ip route add $cidr dev gre-office1 table 60
+    - ['office1', 'gre-office1']
+    # for cidr in office2:
+    #     ip route add $cidr dev gre-office2 table 60
+    - ['office2', 'gre-office2']
+
+    # ip route flush table 80
+    80:
+    # ip route add 114.114.114.114 via 1.2.3.4 dev eth0
+    - ['114.114.114.114', 'telecom']
+    # ip route add 114.114.115.115 dev pppoe0
+    - ['114.114.115.115', 'unicom']
+
+    # create table 100, with routing entries reads as:
+    # * route telecom destination traffic through telecom gateway
+    # * route unicom destination traffic through unicom gateway
+    # * route all other traffic through telecom gateway
+    100:
+    - ['telecom', 'telecom']
+    - ['unicom', 'unicom']
+    - ['default', 'telecom']
+
+  rules:
+  - 'from all lookup 60 pref 60'
+  - 'from all lookup 80 pref 80'
+  - 'from all fwmark 0x0100/0xff00 lookup 100 pref 100'
+  - 'from all fwmark 0x0200/0xff00 lookup 10 pref 100'
+  - 'from all lookup 200 pref 200'
+
+netzone_search_path:
+- /opt/gateway/netzones/

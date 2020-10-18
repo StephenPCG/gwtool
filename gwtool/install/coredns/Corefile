@@ -1,0 +1,26 @@
+(common) {
+    bind 127.0.0.1
+    cache
+    # log
+}
+
+.:5301 {
+    import common
+    forward . tls://8.8.8.8 tls://8.8.4.4 {
+        tls_servername dns.google
+    }
+}
+
+.:5302 {
+    import common
+    forward . tls://1.1.1.1 tls://1.0.0.1 {
+        tls_servername cloudflare-dns.com
+    }
+}
+
+.:5303 {
+    import common
+    forward . tls://9.9.9.9 tls://9.9.9.10 {
+        tls_servername dns.quad9.net
+    }
+}

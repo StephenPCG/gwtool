@@ -95,6 +95,10 @@ def xcall(command, **kwargs):
         logger.error(f'ERROR: command exited with non-zero: {ret}')
 
 
+def xrun(command):
+    xcall(shlex.split(command))
+
+
 def _gen_command(prefix):
     def _command(*args, **kwargs):
         command = prefix if isinstance(prefix, list) else shlex.split(prefix)

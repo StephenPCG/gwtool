@@ -5,7 +5,6 @@ import socket
 import logging
 from pathlib import Path
 
-
 from gwtool.utils import run_as_root, single_instance
 from gwtool.env import env
 from gwtool import libgw

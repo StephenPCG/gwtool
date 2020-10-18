@@ -1,0 +1,8 @@
+*.sw[op]
+
+*.py[cd]
+__pycache__/
+
+*.egg-info
+dist/
+build/

@@ -128,7 +128,7 @@ def install_dnsmasq():
     copyfile(datadir / 'bogus-nxdomain.china.conf', targetdir / 'conf.d/bogus-nxdomain.china.conf')
     xrun(f'ln -snf {datadir / "dnsmasq.conf"} /etc/dnsmasq.conf')
 
-    Path('/var/log/dnsmasq').mkdir(parents=True, exists_ok=True)
+    Path('/var/log/dnsmasq').mkdir(parents=True, exist_ok=True)
     copyfile(datadir / 'dnsmasq.logrotate.conf', '/etc/logrotate.d/dnsmasq')
 
     xrun('systemctl enable dnsmasq')

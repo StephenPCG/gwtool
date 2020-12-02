@@ -142,7 +142,7 @@ def copyfile(src, dst, create_dst_dir=True, backup=False):
 
     if not dst.parent.exists():
         print(f'create dst dir {dst.parent}')
-        dst.parent.mkdir(parents=True, exists_ok=True)
+        dst.parent.mkdir(parents=True, exist_ok=True)
 
     if dst.exists():
         if backup:

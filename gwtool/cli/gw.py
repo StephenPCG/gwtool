@@ -123,9 +123,9 @@ def install_dnsmasq():
     copyfile(datadir / 'dnsmasq.conf', targetdir / 'dnsmasq.conf', backup=True)
     copyfile(datadir / 'conf.d/china-114.conf', targetdir / 'conf.d/china-114.conf')
     copyfile(datadir / 'conf.d/china-223.conf', targetdir / 'conf.d/china-223.conf')
-    copyfile(datadir / 'apple.china.conf', targetdir / 'conf.d/apple.china.conf')
-    copyfile(datadir / 'google.china.conf', targetdir / 'conf.d/google.china.conf')
-    copyfile(datadir / 'bogus-nxdomain.china.conf', targetdir / 'conf.d/bogus-nxdomain.china.conf')
+    copyfile(datadir / 'conf.d/apple.china.conf', targetdir / 'conf.d/apple.china.conf')
+    copyfile(datadir / 'conf.d/google.china.conf', targetdir / 'conf.d/google.china.conf')
+    copyfile(datadir / 'conf.d/bogus-nxdomain.china.conf', targetdir / 'conf.d/bogus-nxdomain.china.conf')
     xrun(f'ln -snf {datadir / "dnsmasq.conf"} /etc/dnsmasq.conf')
 
     Path('/var/log/dnsmasq').mkdir(parents=True, exist_ok=True)

@@ -86,6 +86,7 @@ def install_coredns():
     copyfile(datadir / 'coredns-tmpfiles.conf', '/usr/lib/tmpfiles.d/coredns.conf')
     copyfile(datadir / 'coredns.service', '/etc/systemd/system/coredns.service')
     copyfile(datadir / 'Corefile', corefile, backup=True)
+    xrun('mkdir -p /etc/coredns')
     xrun(f'ln -snf {corefile} /etc/coredns/Corefile')
     xrun('systemd-sysusers')
     xrun('systemd-tmpfiles --create')

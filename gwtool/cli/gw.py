@@ -147,7 +147,7 @@ def install_collectd():
     collectd_config_file = env.workspace / 'configs' / 'collectd.conf'
 
     if not Path('/var/lib/dpkg/info/collectd.list').exists():
-        xrun('apt-get install -y --no-install-recommends collectd liboping0')
+        xrun('apt-get install -y --no-install-recommends collectd liboping0 lm-sensors')
 
     copyfile(datadir / 'collectd.conf', collectd_config_file, backup=True)
     xrun(f'ln -snf {collectd_config_file} /etc/collectd/collectd.conf')

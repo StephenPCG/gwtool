@@ -33,7 +33,7 @@ table inet firewall {
         # equivalent to '-j TCPMSS --clamp-mss-to-pmtu'.
         tcp flags syn tcp option maxseg size set rt mtu
 
-	jump portmap_forward_custom
+        jump portmap_forward_custom
 
         iifgroup vmap {
             0x1: jump forward_from_wan,
@@ -45,6 +45,8 @@ table inet firewall {
 
     chain output {
         type filter hook output priority 0; policy accept;
+
+        tcp flags syn tcp option maxseg size set rt mtu
     }
 
     chain input_from_lan {
